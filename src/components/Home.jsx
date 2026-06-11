@@ -1,43 +1,22 @@
 import { useEffect, useState } from "react";
 import Doctorcard from "./Doctorcard";
-
-function Home({ newdoctor }) {
+import axios from "axios";
+import { useMemo } from "react";
+// function Home() {
+function Home({ newdoc, handleEdit }) {
   const [doctors, setDoctors] = useState([]);
   const [search, setSearch] = useState("");
   const [specialization, setSpecialization] = useState("");
 
-  function fetchDoctors() {
-    let data = [
-      {
-        id: 1,
-        name: "Teja",
-        age: 26,
-        gender: "Male",
-        specialization: "Muscles",
-        salary: 7000000,
-      },
+  async function fetchDoctors() {
+    try {
+      let finaldata = await axios.get("http://doc-back.onrender.com/doctors");
+      console.log(finaldata);
 
-      {
-        id: 2,
-        name: "Sam",
-        age: 26,
-        gender: "Male",
-        specialization: "Bones",
-        salary: 4000000,
-      },
-
-      {
-        id: 3,
-        name: "Anu",
-        age: 25,
-        gender: "Female",
-        specialization: "Heart",
-        salary: 5000000,
-      },
-    ];
-  
-
-    setDoctors(data);
+      setDoctors(finaldata.data);
+    } catch (err) {
+      console.log("some error is there");
+    }
   }
 
   useEffect(() => {
@@ -45,19 +24,28 @@ function Home({ newdoctor }) {
   }, []);
 
   useEffect(() => {
-    if (newdoctor) {
-      setDoctors((prev) => [...prev, newdoctor]);
-    }
-  }, [newdoctor]);
+    fetchDoctors();
 
+    // if (newdoc) {
+    //   setDoctors((prev) => [...prev, newdoc]);
+    // }
+  }, [newdoc]);
 
-  const filteredDoctors=doctors.filter((doctor)=>{
-    return (
-        doctor.name.toLowerCase().includes(search)
-        &&
-        (specialization=="" || doctor.specialization==specialization)
-    )
-  })
+  async function handledelete(id) {
+    alert(id);
+    await axios.delete(`https://doc-back.onrender.com/doctors/${id}`);
+    fetchDoctors();
+  }
+
+  const filteredDoctors = useMemo(() => {
+    return doctors.filter((doctor) => {
+      return (
+        doctor.name.toLowerCase().includes(search) &&
+        (specialization == "" || doctor.specialization == specialization)
+      );
+    });
+  }, [search, doctors, specialization]);
+
   return (
     <div>
       <div className="filters">
@@ -68,28 +56,18 @@ function Home({ newdoctor }) {
           className="textfield"
           onChange={(e) => setSearch(e.target.value)}
         />
-  <select
-        className="textfield"
+        <select
+          className="textfield"
           value={specialization}
           onChange={(e) => setSpecialization(e.target.value)}
         >
+          <option value="">All</option>
 
-          <option value="">
-            All
-          </option>
+          <option value="Muscles">Muscles</option>
 
-          <option value="Muscles">
-            Muscles
-          </option>
+          <option value="Bones">Bones</option>
 
-          <option value="Bones">
-            Bones
-          </option>
-
-          <option value="Heart">
-            Heart
-          </option>
-
+          <option value="Heart">Heart</option>
         </select>
       </div>
       <div className="doctorparent">
@@ -100,6 +78,9 @@ function Home({ newdoctor }) {
               name={doctor.name}
               specialization={doctor.specialization}
               gender={doctor.gender}
+              id={doctor.id}
+              handledelete={handledelete}
+              handleEdit={() => handleEdit(doctor)}
             />
           ))
         ) : (

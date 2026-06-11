@@ -1,6 +1,8 @@
 
 import './styles.css'
-function Doctorcard({name,gender,specialization}) {
+import { useNavigate } from 'react-router-dom'
+function Doctorcard({name,gender,specialization,id,handledelete,handleEdit}) {
+  let navigate=useNavigate()
   return (
     <div className='card'>
         <img src="https://cdn-icons-png.flaticon.com/512/387/387561.png" alt="" width='100' />
@@ -8,7 +10,11 @@ function Doctorcard({name,gender,specialization}) {
             <h2>{name}</h2>
             <p className="subtitle">{specialization}</p>
             <p className="subtitle">{gender} </p>
-            <button className='btn'>view details</button>
+            <button onClick={handleEdit}>
+  Edit
+</button>
+            <button className='btn' onClick={() => handledelete(`${id}`)}>Delete</button>
+            <button className='btn' onClick={() => navigate(`/doctor/${id}`)}>view details</button>
         </div>
     </div>
   )
